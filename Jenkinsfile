@@ -1,3 +1,4 @@
+Jenkins-pipeline
 pipeline {
     agent any 
     environment {
@@ -40,7 +41,7 @@ pipeline {
             steps {
                 echo "SonarQube analysis starting.."
                 withSonarQubeEnv('sonar-server') {
-                    withCredentialsId([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
                         sh "${sonarHome}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN"
                     }
                 }
