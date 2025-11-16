@@ -1,4 +1,3 @@
-Jenkins-pipeline
 pipeline {
     agent any 
     environment {
@@ -66,8 +65,8 @@ pipeline {
                     def uploadSpec = """{
                         "files": [
                             {
-                                "pattern": "target/*.war"
-                                "target": "google-libs-release-local",
+                                "pattern": "target/*.war",
+                                "target": "google-libs-release-local/",
                                 "flat": "false",
                                 "props": "${properties}",
                                 "exclusions": [ "*.sha1", "*.md5" ]
