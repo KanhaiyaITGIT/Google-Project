@@ -1,3 +1,4 @@
+Jenkins-pipeline
 pipeline {
     agent any 
     environment {
@@ -40,7 +41,7 @@ pipeline {
             steps {
                 echo "SonarQube analysis starting.."
                 withSonarQubeEnv('sonar-server') {
-                    withCredentials([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
+                    withCredentialsId([string(credentialsId: 'sonar-credentials', variable: 'SONAR_TOKEN')]) {
                         sh "${sonarHome}/bin/sonar-scanner -Dsonar.login=$SONAR_TOKEN"
                     }
                 }
@@ -56,7 +57,33 @@ pipeline {
                 echo "Quality Gates analysis completed"
             }
         }
+        stage("Jar Publish") {
+            steps {
+                script {
+                    echo '<--------------- Jar Publish Started --------------->'
+                    def server = Artifactory.server('jfrog-server')
+                    def properties = "buildid=${env.BUILD_ID},commitid=${GIT_COMMIT}"
+                    def uploadSpec = """{
+                        "files": [
+                            {
+                                "pattern": "target/*.war"
+                                "target": "google-libs-release-local",
+                                "flat": "false",
+                                "props": "${properties}",
+                                "exclusions": [ "*.sha1", "*.md5" ]
+                            }
+                        ]
+                    }"""
+                    def buildInfo = server.upload(uploadSpec)
+                    buildInfo.env.collect()
+                    server.publishBuildInfo(buildInfo)
+                    echo '<--------------- Jar Publish Ended --------------->'
+                }
+            }
+        }
+
     }
+
     post {
         success {
             echo "Pipeline successfully checked"
